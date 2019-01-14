@@ -16,7 +16,7 @@ var (
 
 func init() {
 	flag.StringVar(&port, "port", "8000", "the local port")
-	flag.StringVar(&db, "db", "serviceDB.db", "The db name")
+	flag.StringVar(&db, "db", "serviceDB", "The db name")
 	flag.Parse()
 }
 
