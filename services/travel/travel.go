@@ -14,7 +14,7 @@ type Service struct {
 	updateEndStmnt  *sql.Stmt
 }
 
-// New initate the Journey service
+// New initate the Journey service and returns the service
 func New(db *sql.DB) (*Service, error) {
 
 	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS journeys(
