@@ -1,0 +1,18 @@
+.App {
+	font-family: 'Open Sans', sans-serif;
+	margin: -8px -8px -8px -8px;
+	display: flex;
+	flex-direction: column;
+}
+
+.header {
+	display: flex;
+	flex-direction: row;
+	height: 5vh;
+	background: orangered;
+	color: white;
+	justify-content: center;
+	align-items: center;
+	font-size: 2em;
+	padding: 5px 20px;
+}

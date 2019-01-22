@@ -1,0 +1,77 @@
+.registerPage {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100vh;
+	background: blueviolet;
+}
+
+.registerForm {
+	display: flex;
+	flex-direction: column;
+	width: 50vw;
+}
+
+.email {
+	flex: 1;
+	font-size: 2em;
+	margin-bottom: 5px;
+	padding-left: 5px;
+	border-style: none;
+	color: greenyellow;
+}
+.email::placeholder {
+	color: greenyellow;
+}
+
+
+.userName {
+	flex: 1;
+	font-size: 2em;
+	margin-bottom: 5px;
+	padding-left: 5px;
+	border-style: none;
+	color: greenyellow;
+}
+.userName::placeholder {
+	color: greenyellow;
+}
+
+.password {
+	flex: 1;
+	font-size: 2em;
+	margin-bottom: 5px;
+	padding-left: 5px;
+	border-style: none;
+	color: greenyellow;
+}
+.password::placeholder {
+	color: greenyellow;
+}
+
+.register {
+	flex: 1;
+	border-style: none;
+	font-size: 2em;
+	background: greenyellow;
+	color: blueviolet;
+}
+
+.register:hover {
+	background:rgb(39, 12, 65);
+	color: greenyellow;
+	cursor: pointer;
+}
+
+.backlogin {
+	color: orangered;
+	align-self: flex-end;
+}
+
+.backlogin:hover {
+	background: rgb(105, 29, 1);
+	color: greenyellow;
+	cursor: pointer;
+}
