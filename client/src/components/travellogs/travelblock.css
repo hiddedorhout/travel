@@ -1,0 +1,31 @@
+.block {
+	display: flex;
+	flex-direction: column;
+	margin-top: 10px;
+	padding: 10px;
+	justify-content: flex-start;
+	align-items: flex-start;
+	background: orange;
+	width: 80vw;
+}
+
+.block:hover {
+	filter: brightness(80%);
+}
+
+.blockHeader {
+	font-size: 2em;
+	color: white;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.image {
+	height: 30px;
+	width: 30px;
+	border-radius: 5px;
+	background: wheat;
+	margin: 3px;
+}
