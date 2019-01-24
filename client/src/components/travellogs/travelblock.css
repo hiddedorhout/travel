@@ -5,12 +5,19 @@
 	padding: 10px;
 	justify-content: flex-start;
 	align-items: flex-start;
-	background: orange;
 	width: 80vw;
 }
 
+#true {
+	background: orange;
+}
+
+#false {
+	background: green;
+}
+
 .block:hover {
-	filter: brightness(80%);
+	filter: brightness(95%);
 }
 
 .blockHeader {
@@ -28,4 +35,16 @@
 	border-radius: 5px;
 	background: wheat;
 	margin: 3px;
+}
+
+.timeBlock {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+}
+
+.time {
+	color: white;
+	font-size: 1.6em;
 }
