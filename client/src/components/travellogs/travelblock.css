@@ -1,15 +1,34 @@
+.main {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 80vw;
+	height: 150px;
+	margin-top: 10px;
+	padding: 10px;
+}
+
 .block {
 	display: flex;
 	flex-direction: column;
-	margin-top: 10px;
-	padding: 10px;
+	flex: 4;
 	justify-content: flex-start;
 	align-items: flex-start;
-	width: 80vw;
+	background: orange;
+	height: inherit;
+}
+
+.starterStopper {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	height: inherit;
 }
 
 #true {
-	background: orange;
+	background: red;
 }
 
 #false {
@@ -44,7 +63,18 @@
 	align-items: flex-start;
 }
 
+.timeDisplay {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
 .time {
 	color: white;
 	font-size: 1.6em;
+}
+
+.manipulateTimeButton {
+	margin: 2px;
 }
