@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hiddedorhout/travel/common"
+	"github.com/hiddedorhout/travel/server/common"
 )
 
 var (
@@ -30,7 +30,5 @@ func main() {
 	service.SetupRoutes()
 
 	log.Println(fmt.Sprintf("Service running on port: %s", port))
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
-		log.Fatal(err)
-	}
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

@@ -8,56 +8,42 @@ import (
 
 // SetupRoutes sets up all endpoints for the we service
 func (s *System) SetupRoutes() {
-	http.HandleFunc("/", s.base)
-	http.HandleFunc("/set-value", s.setValue)
-	http.HandleFunc("/get-value", s.getValue)
+	http.HandleFunc("/travel/v1/login", s.login)
+	http.HandleFunc("/travel/v1/register", s.register)
 }
 
-func (s *System) setValue(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Only POST request implemented", http.StatusNotImplemented)
-		return
-	}
-
+func (s *System) login(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	type requestBodyType struct {
-		Key   string `json:"key"`
-		Value string `json:"value"`
+
+	type loginRequestBody struct {
+		UserName string `json:"username"`
+		Password string `json:"password"`
 	}
-	var rb requestBodyType
+	var rb loginRequestBody
 	if err := json.Unmarshal(body, &rb); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err := s.kvStore.Store(rb.Key, rb.Value); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if len(rb.UserName) == 0 || len(rb.Password) == 0 {
+		http.Error(w, "Missing request parameters", http.StatusBadRequest)
 		return
 	}
+
+	if _, err := s.users.CheckPassword(rb.UserName, rb.Password); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// Create session cookie
+
 	w.WriteHeader(200)
+
 }
 
-func (s *System) getValue(w http.ResponseWriter, r *http.Request) {
-	keys := r.URL.Query()
-	key := keys.Get("key")
-	if key == "" {
-		http.Error(w, "No key query parameter found", http.StatusBadRequest)
-		return
-	}
-	value, err := s.kvStore.Get(key)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusFound)
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(*value))
-}
+func (s *System) register(w http.ResponseWriter, r *http.Request) {
 
-func (s *System) base(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("Welcome to a Go web server with key value storage"))
 }

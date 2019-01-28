@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+  contact:
+    name: Hidde Dorhout
+    email: devdorhout@gmail.com
+    url: https://hiddedorhout.nl
+tags:
+  - name: Users
+    description: User related APIS
+paths:
+  /travel/v1/login:
+    post:
+      operationId: userLogin
+      summary: Authenticate an end user
+      tags: [ 'Users' ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/loginRequestBody"
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              description: Authentication session cookie
+              schema:
+                type: string
+                example: sessionID=<JWT>
+                
+        '400':
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/loginErrorResponse"
+
+components:
+  schemas:
+    loginRequestBody:
+      type: object
+      properties:
+        username:
+          type: string
+          example: j.doe
+        password:
+          type: string
+          example: password
+    loginErrorResponse:
+      type: object
+      properties:
+        reason:
+          type: string
+          example: invalid password
