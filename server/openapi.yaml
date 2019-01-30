@@ -8,7 +8,10 @@ info:
     url: https://hiddedorhout.nl
 tags:
   - name: Users
-    description: User related APIS
+    description: User related APIs
+  - name: Travel
+    description: Travel related APIs
+
 paths:
   /travel/v1/login:
     post:
@@ -30,13 +33,249 @@ paths:
               schema:
                 type: string
                 example: sessionID=<JWT>
-                
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
         '400':
             description: Bad Request
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/loginErrorResponse"
+                  $ref: "#/components/schemas/errorResponse"
+  /travel/v1/register:
+    post:
+      operationId: registerNewUser
+      summary: Register a new user
+      tags: [ 'Users' ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/registerRequestBody'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/registerResponseBody'
+        400:
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/errorResponse"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+  /travel/v1/travel-session/{travelSessionID}:
+    post:
+      operationId: startTravelSession
+      summary: Starts a new travel session
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            format: jwt
+      tags:
+        - Travel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/startTravelSessionRequestBody"
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/startTravelSessionResponeBody"
+    put:
+      operationId: updateTravelSession
+      summary: Update the travel session
+      tags:
+        - Travel
+      parameters:
+        - in: path
+          name: travelSessionID
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: jwt
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateTravelSessionRequestBody"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+    get:
+      operationId: getTravelSession
+      summary: Get the current travel session
+      tags:
+        - Travel
+      parameters:
+        - in: path
+          name: travelSessionID
+          required: true
+          schema:
+            type: string
+        - in: header
+          required: true
+          name: Authorization
+          schema:
+            type: string
+            format: jwt
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/travelSessionResponseBody"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+    delete:
+      operationId: deleteTravelSession
+      summary: Delete the current travel session
+      tags:
+        - Travel
+      parameters:
+        - in: path
+          name: travelSessionID
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            format: jwt
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        404:
+          description: Not Found
+  /travel/v1/routes-list:
+    get:
+      tags:
+        - Travel
+      operationId: getRoutesList
+      summary: Returns a list of travel routeIDs
+      parameters:
+        - in: header
+          required: true
+          name: Authorization
+          schema:
+            type: string
+            format: jwt
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/travelListResponseBody"
+        400:
+          description: Bad Request
+  /travel/v1/route/{routeID}:
+    get:
+      summary: Returns the schema of a route
+      tags:
+        - Travel
+      operationId: getRoute
+      parameters:
+        - in: path
+          name: routeID
+          required: true
+          schema:
+            type: string
+        - in: header
+          required: true
+          name: Authorization
+          schema:
+            type: string
+            format: jwt
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/routeResponeBody"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+    post:
+      operationId: createRoute
+      tags:
+        - Travel
+      parameters:
+        - in: header
+          required: true
+          name: Authorization
+          schema:
+            type: string
+            format: jwt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createRouteRequestBody"
+      responses:
+        201:
+          description: Created
 
 components:
   schemas:
@@ -49,9 +288,66 @@ components:
         password:
           type: string
           example: password
-    loginErrorResponse:
+    errorResponse:
       type: object
       properties:
         reason:
           type: string
           example: invalid password
+    registerRequestBody:
+      type: object
+      properties:
+        username:
+          type: string
+          example: John Doe
+        password:
+          type: string
+          example: password
+    registerResponseBody:
+      type: object
+      properties:
+        userID: 
+          type: string
+          example: 96f79435-df36-4c94-8399-1d5cb01c55ff
+    startTravelSessionRequestBody:
+      type: object
+      properties:
+        routeID:
+          type: string
+          example: 6708d0a8-a7ec-455a-a32d-81363b1cfbea
+        timestamp:
+          type: integer
+    startTravelSessionResponeBody:
+      type: object
+      properties:
+        travelSchema:
+          type: object
+    updateTravelSessionRequestBody:
+      type: object
+      properties:
+        id:
+          type: string
+    travelSessionResponseBody:
+      type: object
+      properties:
+        id:
+          type: string
+    travelListResponseBody:
+      type: object
+      properties:
+        routes:
+          type: array
+          items:
+            type: object
+            properties:
+              routeID:
+                type: string
+                format: uuid
+                example: 6708d0a8-a7ec-455a-a32d-81363b1cfbea
+              description:
+                type: string
+                example: Home - Work (regular)
+    routeResponeBody:
+      type: object
+    createRouteRequestBody:
+      type: object
