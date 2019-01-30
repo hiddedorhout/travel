@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"log"
 
+	"github.com/hiddedorhout/travel/server/services/routes"
+
 	"github.com/hiddedorhout/travel/server/services/sessions"
 
 	"github.com/hiddedorhout/travel/server/services/serviceCert"
@@ -22,6 +24,7 @@ type System struct {
 	db       *sql.DB
 	kvStore  *kv_store.Service
 	users    *users.Service
+	routes   *routes.Service
 	travels  *travel.Service
 	sessions *sessions.Service
 }
@@ -44,6 +47,11 @@ func New(dbName string) (*System, error) {
 	}
 
 	users, err := users.New(db)
+	if err != nil {
+		return nil, err
+	}
+
+	routes, err := routes.New(db)
 	if err != nil {
 		return nil, err
 	}
@@ -82,6 +90,7 @@ func New(dbName string) (*System, error) {
 		db:       db,
 		kvStore:  kvStore,
 		travels:  travel,
+		routes:   routes,
 		users:    users,
 		sessions: sessions,
 	}, nil
