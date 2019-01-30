@@ -18,7 +18,7 @@ func GenPkey() (*rsa.PrivateKey, error) {
 	return pkey, nil
 }
 
-func SelfSignedCert(pkey rsa.PrivateKey) (*[]byte, error) {
+func SelfSignedCert(pkey *rsa.PrivateKey) (*[]byte, error) {
 
 	max := new(big.Int)
 	max.Exp(big.NewInt(2), big.NewInt(64), nil).Sub(max, big.NewInt(1))

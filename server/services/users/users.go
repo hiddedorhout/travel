@@ -18,7 +18,7 @@ type Service struct {
 func New(db *sql.DB) (*Service, error) {
 
 	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS users(
-		ID NOT NULL TET PRIMARY KEY,
+		ID TEXT NOT NULL PRIMARY KEY,
 		username TEXT NOT NULL UNIQUE,
 		password TEXT NOT NULL
 	)`); err != nil {
@@ -73,7 +73,7 @@ func (s *Service) CheckPassword(username, password string) (*string, error) {
 		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(password), rawPwdHash); err != nil {
+	if err := bcrypt.CompareHashAndPassword(rawPwdHash, []byte(password)); err != nil {
 		return nil, err
 	}
 

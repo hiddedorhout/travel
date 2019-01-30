@@ -9,7 +9,9 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
-	"log"
+	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hiddedorhout/travel/server/services/kv_store"
@@ -38,63 +40,57 @@ type jwtPayload struct {
 	Iss string `json:"iss"`
 	Aud string `json:"aud"`
 	Sub string `json:"sub"`
-	Iat int    `json:"iat`
+	Iat int    `json:"iat"`
 	Exp int    `json:"exp"`
 }
 
 func (s *Service) GenerateSession(aud string) (*string, error) {
-	header := jwtHeader{
-		Alg: "RSA1_5",
-		Typ: "JWT",
-	}
-
-	payload := jwtPayload{
-		Iss: "Travel application",
-		Aud: aud,
-		Sub: "SessionToken",
-		Iat: time.Now().Nanosecond(),
-		Exp: time.Now().Add(60 * time.Second).Nanosecond(),
-	}
-
-	bpayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-	bheader, err := json.Marshal(header)
-	if err != nil {
-		return nil, err
-	}
-
-	encPayload := encode(bpayload)
-	encHeader := encode(bheader)
-
-	tbs := encHeader + "." + encPayload
 
 	b64pkey, err := s.kvStore.Get("pkey")
 	if err != nil {
-		return nil, err
+		return nil, errorHandler(err, "getting pkey")
 	}
 
 	rawPkey, err := base64.StdEncoding.DecodeString(*b64pkey)
 	if err != nil {
-		return nil, err
+		return nil, errorHandler(err, "decoding pkey")
 	}
 	pkey, err := x509.ParsePKCS1PrivateKey(rawPkey)
 	if err != nil {
-		return nil, err
+		return nil, errorHandler(err, "parsing pkey")
 	}
 
-	signature, err := sign(pkey, []byte(tbs))
+	jwt, err := generateSession(aud, pkey)
 	if err != nil {
-		return nil, err
+		return nil, errorHandler(err, "creating jwt")
 	}
 
-	b64sig := base64.URLEncoding.EncodeToString(*signature)
-
-	jwt := tbs + "." + b64sig
-	return &jwt, nil
+	return jwt, nil
 
 }
+
+func (s *Service) ValidateSession(jwt string) error {
+	b64cert, err := s.kvStore.Get("cert")
+	if err != nil {
+		return errorHandler(err, "Certificate")
+	}
+	rawCert, err := base64.StdEncoding.DecodeString(*b64cert)
+	if err != nil {
+		return errorHandler(err, "decoding cert")
+	}
+	certificate, err := x509.ParseCertificate(rawCert)
+	if err != nil {
+		return errorHandler(err, "parsing cert")
+	}
+
+	pubkey := certificate.PublicKey.(*rsa.PublicKey)
+
+	if err := validateSession(jwt, pubkey); err != nil {
+		return err
+	}
+	return nil
+}
+
 func generateSession(aud string, pkey *rsa.PrivateKey) (*string, error) {
 	header := jwtHeader{
 		Alg: "RS256",
@@ -139,23 +135,51 @@ func generateSession(aud string, pkey *rsa.PrivateKey) (*string, error) {
 
 }
 
-func (s *Service) ValidateSession(jwt string) error {
-	b64cert, err := s.kvStore.Get("cert")
-	if err != nil {
-		return err
-	}
-	rawCert, err := base64.StdEncoding.DecodeString(*b64cert)
-	if err != nil {
-		return err
-	}
-	certificate, err := x509.ParseCertificate(rawCert)
-	if err != nil {
-		return err
+func validateSession(jwt string, pubkey *rsa.PublicKey) error {
+
+	jot := strings.Split(jwt, ".")
+	if len(jot) != 3 {
+		return errors.New("Invalid jwt")
 	}
 
-	log.Println(certificate)
+	rawHeader, err := base64.URLEncoding.DecodeString(jot[0])
+	if err != nil {
+		return errorHandler(err, "base64 decode header")
+	}
 
-	// validate signature
+	rawPayload, err := base64.URLEncoding.DecodeString(jot[1])
+	if err != nil {
+		return errorHandler(err, "base64 decode payload")
+	}
+
+	signature, err := base64.URLEncoding.DecodeString(jot[2])
+	if err != nil {
+		return errorHandler(err, "base64 decode signature")
+	}
+
+	var header jwtHeader
+	var payload jwtPayload
+
+	if err := json.Unmarshal(rawHeader, &header); err != nil {
+		return errorHandler(err, "Marshal header")
+	}
+	if err := json.Unmarshal(rawPayload, &payload); err != nil {
+		return errorHandler(err, "Marshal payload")
+	}
+
+	tbs := jot[0] + "." + jot[1]
+
+	h := sha256.New()
+	h.Write([]byte(tbs))
+	hashed := h.Sum(nil)
+
+	if err := rsa.VerifyPKCS1v15(pubkey, crypto.SHA256, hashed, signature); err != nil {
+		return errorHandler(err, "Invalid signature")
+	}
+
+	if payload.Exp > time.Now().Nanosecond() {
+		return errorHandler(errors.New("Token error"), "token expired")
+	}
 
 	return nil
 }
@@ -172,4 +196,8 @@ func sign(pkey *rsa.PrivateKey, tbs []byte) (*[]byte, error) {
 	}
 	return &sig, nil
 
+}
+
+func errorHandler(err error, message string) error {
+	return fmt.Errorf("%s: %s", message, err.Error())
 }

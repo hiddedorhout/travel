@@ -126,7 +126,7 @@ func (s *System) updateTravelSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *System) getTravelSession(w http.ResponseWriter, r *http.Request) {
-
+	w.WriteHeader(200)
 }
 
 func (s *System) deleteTravelSession(w http.ResponseWriter, r *http.Request) {
@@ -176,9 +176,11 @@ func (s *System) validateAuthorization(h func(w http.ResponseWriter, r *http.Req
 		auth := r.Header.Get("Authorization")
 		if len(auth) == 0 {
 			errorResponseWriter(w, "Missing Authorization header", http.StatusBadRequest)
+			return
 		}
 		if err := s.sessions.ValidateSession(auth); err != nil {
 			errorResponseWriter(w, err.Error(), http.StatusUnauthorized)
+			return
 		}
 		h(w, r)
 	}

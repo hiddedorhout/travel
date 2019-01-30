@@ -35,9 +35,8 @@ func TestGenerateSession(t *testing.T) {
 	if err := pem.Encode(os.Stdout, p); err != nil {
 		log.Fatal(err)
 	}
-}
 
-func TestOther(t *testing.T) {
-	s := "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ"
-	t.Log([]byte(s))
+	if err := validateSession(*jwt, &pubkey); err != nil {
+		t.Fatal(err)
+	}
 }

@@ -22,7 +22,7 @@ func New(db *sql.DB) (*Service, error) {
 		Type TEXT NOT NULL,
 		StartTime TIMESTAMP,
 		EndTime TIMESTAMP,
-		Price FLOAT,
+		Price FLOAT
 	)`); err != nil {
 		return nil, err
 	}

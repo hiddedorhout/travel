@@ -48,27 +48,29 @@ func New(dbName string) (*System, error) {
 		return nil, err
 	}
 
-	log.Println("Generating service private key and cert")
-	pkey, err := serviceCert.GenPkey()
-	if err != nil {
-		return nil, err
-	}
+	if _, err := kvStore.Get("pkey"); err != nil {
+		log.Println("Generating service private key and cert")
+		pkey, err := serviceCert.GenPkey()
+		if err != nil {
+			return nil, err
+		}
 
-	pkcs1 := x509.MarshalPKCS1PrivateKey(pkey)
-	if err != nil {
-		return nil, err
-	}
+		pkcs1 := x509.MarshalPKCS1PrivateKey(pkey)
+		if err != nil {
+			return nil, err
+		}
 
-	if err := kvStore.Store("pkey", base64.StdEncoding.EncodeToString(pkcs1)); err != nil {
-		return nil, err
-	}
+		if err := kvStore.Store("pkey", base64.StdEncoding.EncodeToString(pkcs1)); err != nil {
+			return nil, err
+		}
 
-	cert, err := serviceCert.SelfSignedCert(*pkey)
-	if err != nil {
-		return nil, err
-	}
-	if err := kvStore.Store("cert", base64.StdEncoding.EncodeToString(*cert)); err != nil {
-		return nil, err
+		cert, err := serviceCert.SelfSignedCert(pkey)
+		if err != nil {
+			return nil, err
+		}
+		if err := kvStore.Store("cert", base64.StdEncoding.EncodeToString(*cert)); err != nil {
+			return nil, err
+		}
 	}
 
 	sessions, err := sessions.New(db, kvStore)
